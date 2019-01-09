@@ -1,7 +1,7 @@
-#ifndef BEACONABOUTDIALOG_HPP
-#define BEACONABOUTDIALOG_HPP
+#ifndef BF_ABOUTDIALOG
+#define BF_ABOUTDIALOG
 
-#define BFABOUTDIALOGVERSION "1.0.0"
+#define BF_ABOUTDIALOGVERSION "1.0.0"
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -1255,4 +1255,4 @@ private slots:
 
 
 
-#endif // BEACONABOUTDIALOG_HPP
+#endif // BF_ABOUTDIALOG
