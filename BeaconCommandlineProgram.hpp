@@ -1,6 +1,8 @@
 #ifndef BF_COMMANDLINEPROGRAM
 #define BF_COMMANDLINEPROGRAM
 
+#define BF_COMMANDLINEPROGRAMVERSION "1.0.0"
+
 #include <QObject>
 #include <QDebug>
 #include <QDir>

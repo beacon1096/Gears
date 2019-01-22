@@ -1,6 +1,8 @@
 #ifndef BF_EXTERNALPROGRAM
 #define BF_EXTERNALPROGRAM
 
+#define BF_EXTERNALPROGRAMVERSION "1.0.0"
+
 #include <QObject>
 #include <QFile>
 #include <QProcess>

@@ -1,6 +1,8 @@
 #ifndef BF_FILEIO
 #define BF_FILEIO
 
+#define BF_FILEIOVERSION "1.0.0"
+
 #include <QObject>
 #include <QFile>
 #include <QTextStream>
