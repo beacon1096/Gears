@@ -22,54 +22,14 @@
 #include <QDesktopServices>
 #include <QStyle>
 
+#include "BeaconFramework.hpp"
+#include "BeaconFileIO.hpp"
+
 class QVBoxLayout;
 class QHBoxLayout;
 class QTabWidget;
 class QTextBrowser;
 
-#ifndef BF_FILEIO
-class BeaconFileIO : public QObject
-{
-    Q_OBJECT
-public:
-    explicit BeaconFileIO(QObject *parent = nullptr){}
-    static bool openFile(QFile& file,QString name,QChar IOMode){
-        bool res=false;
-        file.setFileName(name);
-        if(IOMode=='r'){
-            res=file.open(QIODevice::ReadOnly | QIODevice::Text);
-        }
-        if(IOMode=='w'){
-            res=file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
-        }
-        return res;
-    }
-    static void bundleIO(QFile& file,QTextStream& str){
-        str.setDevice(&file);
-    }
-    static QString readFileContent(QString fileName){
-        QFile file(fileName);
-        if(!openFile(file,fileName,'r'))return QStringLiteral("*/*Plasma File General Error*/*");
-        QTextStream inputStream(&file);
-        QString res;
-        while(!inputStream.atEnd()){
-            res.append(inputStream.readAll());
-        }
-        return res;
-    }
-    static bool saveFileContent(QString fileName,QString content){
-        QFile file(fileName);
-        if(!openFile(file,fileName,'w'))return false;
-        QTextStream outputStram(&file);
-        outputStram<<content;
-        return true;
-    }
-    static bool fileExist(QString fileName){
-        QFile file(fileName);
-        return file.exists();
-    }
-};
-#endif
 class BeaconAboutPerson{
 public:
     explicit BeaconAboutPerson(const QString &name = QString(),
@@ -678,7 +638,25 @@ public:
 private:
     QString _url;
 };
-
+class BeaconLibraryInfo : public QObject
+{
+    Q_OBJECT
+public:
+    BeaconLibraryInfo(const QString &name,
+                      const QString &shortDescription,
+                      const QString &version) {
+        _name=name;
+        _shortDescription=shortDescription;
+        _version=version;
+    }
+    QString name(){return _name;}
+    QString shortDescripton(){return _shortDescription;}
+    QString version(){return _version;}
+private:
+    QString _name;
+    QString _shortDescription;
+    QString _version;
+};
 class BeaconAboutPersonWidget : public QWidget{
     Q_OBJECT
 public:
@@ -839,6 +817,7 @@ public:
     QList<BeaconAboutPerson> authors(){return _authorList;}
     QList<BeaconAboutPerson> credits(){return _creditList;}
     QList<BeaconAboutLicense> licenses(){return _licenseList;}
+    QList<BeaconLibraryInfo> libraries(){return _libraryList;}
     void addAuthor(const QString &name,
                                const QString &task = QString(),
                                const QString &emailAddress = QString(),
@@ -848,12 +827,18 @@ public:
          _authorList.append(BeaconAboutPerson(name,task,emailAddress,webAddress,ocsUsername));
     }
     void addCredit(const QString &name,
-                               const QString &task = QString(),
-                               const QString &emailAddress = QString(),
-                               const QString &webAddress = QString(),
-                               const QString &ocsUsername = QString())
+                   const QString &task = QString(),
+                   const QString &emailAddress = QString(),
+                   const QString &webAddress = QString(),
+                   const QString &ocsUsername = QString())
     {
         _creditList.append(BeaconAboutPerson(name,task,emailAddress,webAddress,ocsUsername));
+    }
+    void addLibrary(const QString &name,
+                    const QString &shortDescripton,
+                    const QString &version)
+    {
+        _libraryList.append(BeaconLibraryInfo(name,shortDescripton,version));
     }
     void setComponentName(const QString &componentName){_componentName = componentName;}
     void setDisplayName(const QString &displayName){_displayName = displayName;}
@@ -912,6 +897,14 @@ public:
     void setBugCustomText(const QString &bugCustomText){_bugCustomText = bugCustomText;}
     void setCustomImage(const QPixmap &pixmap){_customImage = pixmap;}
     void setCustomImage(const QIcon &icon){_customImage = icon.pixmap(48,48);}
+    void initBFPlugins(){
+#ifdef BF_ABOUTDIALOG
+        addLibrary(tr("AboutDialog",tr("KDE-like About Dialog"),BF_ABOUTDIALOGVERSION);
+#endif
+        #ifdef
+
+        #endif
+    }
 private:
     QString _componentName;
     QString _displayName;
@@ -925,6 +918,7 @@ private:
     QList<BeaconAboutPerson> _creditList;
     QList<BeaconAboutPerson> _translatorList;
     QList<BeaconAboutLicense> _licenseList;
+    QList<BeaconLibraryInfo> _libraryList;
     QString _bugCustomText;
     QPixmap _customImage;
 };
@@ -1153,13 +1147,17 @@ public:
         QWidget *versionWidget = new QWidget(this);
         QVBoxLayout *versionLayout = new QVBoxLayout;
         QLabel *versionLabel = new QLabel(versionWidget);
+        QLabel *librariesLabel = new QLabel(versionWidget);
         versionLabel->setText(QString("<ul><li>Beacon Frameworks %1</li><li>Qt %2 (built against %3)</li><li>The <em>%4</em> windowing system</li></ul>").
                               arg(QStringLiteral(BFABOUTDIALOGVERSION)).
                               arg(QString::fromLocal8Bit(qVersion())).
                               arg(QStringLiteral(QT_VERSION_STR)).
                               arg(QGuiApplication::platformName()));
+        librariesLabel->setText("Libraries:");
         versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        librariesLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
         versionLayout->addWidget(versionLabel);
+        versionLayout->addWidget(librariesLabel);
         versionLayout->addStretch();
         versionWidget->setLayout(versionLayout);
         tabWidget->addTab(versionWidget,tr("&Libraries"));
