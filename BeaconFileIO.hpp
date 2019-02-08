@@ -8,6 +8,8 @@
 #include <QTextStream>
 #include <QUrl>
 #include <QDebug>
+#include <QFileDialog>
+#include <QString>
 
 class BeaconFileIO : public QObject
 {
@@ -31,7 +33,7 @@ public:
     const static QString readFileContent(QString fileName){
         qDebug() << "BeaconFileIO::readFileContent:"<< fileName;
         QFile file(fileName);
-        if(!openFile(file,fileName,'r'))return QStringLiteral("*/*Plasma File General Error*/*");
+        if(!openFile(file,fileName,'r'))return QStringLiteral("*/*Beacon File General Error: Cannot open target file*/*");
         QTextStream inputStream(&file);
         QString res;
         while(!inputStream.atEnd()){
@@ -52,7 +54,21 @@ public:
     }
     static bool fileExist(QString fileName){
         QFile file(fileName);
+        qDebug() << "[BF-FileIO]Checking Existance:" << fileName;
         return file.exists();
+    }
+    static bool fileExist(QUrl fileName){
+        QFile file(fileName.toLocalFile());
+        return file.exists();
+    }
+    static QUrl selectOpenFile(const QString &type,const QString &filter){
+        return QFileDialog::getOpenFileUrl(nullptr,QString(),QUrl(),QString("%1 (%2)").arg(type).arg(filter));
+    }
+    static QUrl selectOpenFile(const QString &type,const QStringList &filter){
+        return selectOpenFile(type,filter.join(","));
+    }
+    static QUrl selectOpenDir(){
+        return QFileDialog::getExistingDirectoryUrl();
     }
 };
 
