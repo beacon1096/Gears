@@ -1,15 +1,12 @@
 #ifndef BF_FILEIO
 #define BF_FILEIO
 
-#define BF_FILEIOVERSION "1.0.0"
-
 #include <QObject>
 #include <QFile>
 #include <QTextStream>
+#include <QDataStream>
 #include <QUrl>
 #include <QDebug>
-#include <QFileDialog>
-#include <QString>
 
 class BeaconFileIO : public QObject
 {
@@ -30,10 +27,10 @@ public:
     static void bundleIO(QFile& file,QTextStream& str){
         str.setDevice(&file);
     }
-    const static QString readFileContent(QString fileName){
+    const static QString readTextFileContent(QString fileName){
         qDebug() << "BeaconFileIO::readFileContent:"<< fileName;
         QFile file(fileName);
-        if(!openFile(file,fileName,'r'))return QStringLiteral("*/*Beacon File General Error: Cannot open target file*/*");
+        if(!openFile(file,fileName,'r'))return QStringLiteral("*/*Plasma File General Error*/*");
         QTextStream inputStream(&file);
         QString res;
         while(!inputStream.atEnd()){
@@ -41,34 +38,45 @@ public:
         }
         return res;
     }
-    static QString readFileContent(QUrl target){
-        QString fileName = target.toLocalFile();
-        return readFileContent(fileName);
+    static QString readTextFileContent(QUrl target){
+        return readTextFileContent(target.toLocalFile());
     }
-    static bool saveFileContent(QString fileName,QString content){
+    const static QByteArray readRawFileContent(QString fileName){
+        qDebug() << "BeaconFileIO::readFileContent:"<< fileName;
+        QFile file(fileName);
+        if(!openFile(file,fileName,'r'))return QStringLiteral("*/*Beacon File General Error*/*").toUtf8();
+        QByteArray res;
+        res = file.readAll();
+        return res;
+    }
+    static QString readRawFileContent(QUrl target){
+        QString fileName = target.toLocalFile();
+        return readRawFileContent(fileName);
+    }
+    static bool saveTextFileContent(QString fileName,QString content){
         QFile file(fileName);
         if(!openFile(file,fileName,'w'))return false;
         QTextStream outputStram(&file);
         outputStram<<content;
+        file.close();
         return true;
+    }
+    static bool saveTextFileContent(QUrl target,QString content){
+        return saveTextFileContent(target.toLocalFile(),content);
+    }
+    static bool saveRawFileContent(QString fileName,QByteArray content){
+        QFile file(fileName);
+        if(!openFile(file,fileName,'w'))return false;
+        file.write(content);
+        file.close();
+        return true;
+    }
+    static bool saveRawFileContent(QUrl target,QByteArray content){
+        return saveRawFileContent(target.toLocalFile(),content);
     }
     static bool fileExist(QString fileName){
         QFile file(fileName);
-        qDebug() << "[BF-FileIO]Checking Existance:" << fileName;
         return file.exists();
-    }
-    static bool fileExist(QUrl fileName){
-        QFile file(fileName.toLocalFile());
-        return file.exists();
-    }
-    static QUrl selectOpenFile(const QString &type,const QString &filter){
-        return QFileDialog::getOpenFileUrl(nullptr,QString(),QUrl(),QString("%1 (%2)").arg(type).arg(filter));
-    }
-    static QUrl selectOpenFile(const QString &type,const QStringList &filter){
-        return selectOpenFile(type,filter.join(","));
-    }
-    static QUrl selectOpenDir(){
-        return QFileDialog::getExistingDirectoryUrl();
     }
 };
 

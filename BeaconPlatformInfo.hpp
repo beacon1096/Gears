@@ -5,6 +5,7 @@
 
 #include <QSysInfo>
 #include <QString>
+#include <QObject>
 
 class BeaconPlatformInfo : public QObject
 {
@@ -12,7 +13,9 @@ class BeaconPlatformInfo : public QObject
 public:
     explicit BeaconPlatformInfo(QObject *parent = nullptr){}
     static bool isWindows(){
-        if(QGuiApplication::platformName()=="windows")
+        if(QSysInfo::productType()=="windows")
+            return true;
+        if(QSysInfo::productType()=="winrt")
             return true;
         #ifdef Q_OS_WIN64
             return true;
@@ -32,16 +35,19 @@ public:
         return false;
     }
     static bool isLinux(){
-        if(QGuiApplication::platformName()=="xcb")
+        if(QSysInfo::kernelType().toLower()=="linux")
             return true;
         #ifdef Q_OS_LINUX
             return true;
         #endif
+        return false;
     }
     static bool isMacos(){
+        if(QSysInfo::productType()=="osx")return true;
         #ifdef Q_OS_MACOS
             return true;
         #endif
+        return false;
     }
     static QString BuildABI(){return QSysInfo::buildAbi();}
     static QString BuildCPUArch(){return QSysInfo::buildCpuArchitecture();}
