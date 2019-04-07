@@ -6,8 +6,8 @@
 #include <QObject>
 #include <QDebug>
 #include <QDir>
-#include "BeaconExternalProgram.h"
-#include "BeaconPlatformInfo.h"
+#include "BeaconExternalProgram.hpp"
+#include "BeaconPlatformInfo.hpp"
 
 class BeaconCommandlineProgram : public BeaconExternalProgram
 {
@@ -16,9 +16,9 @@ public:
     explicit BeaconCommandlineProgram(QString platform=QString("auto"))
     {
         if(platform=="auto"){
-        if(BeaconPlatformInfo::isWindows)platform=QString("windows");
-        else if(BeaconPlatformInfo::isMacos)platform=QString("macos");
-        else if(BeaconPlatformInfo::isLinux)platform=QString("linux");
+        if(BeaconPlatformInfo::isWindows())platform=QString("windows");
+        else if(BeaconPlatformInfo::isMacos())platform=QString("macos");
+        else if(BeaconPlatformInfo::isLinux())platform=QString("linux");
         }
         if(platform=="windows"){
             //qDebug() << "Current Directory:" << QDir::
